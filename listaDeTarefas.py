@@ -1,12 +1,34 @@
 from InquirerPy import prompt
 import os
+import json  # Usando JSON para salvar as tarefas de forma estruturada
 
 
 # Função principal do programa
-
 def listaDeTarefas():
+    # Nome do arquivo para salvar as tarefas
+    ARQUIVO_TAREFAS = "tarefas.txt"
+
     # Inicializa uma lista vazia para armazenar as tarefas
     tarefas = []
+
+    # Função para carregar tarefas do arquivo
+    def carregar_tarefas():
+        if os.path.exists(ARQUIVO_TAREFAS):
+            try:
+                with open(ARQUIVO_TAREFAS, "r") as arquivo:
+                    return json.load(arquivo)
+            except Exception as e:
+                print(f"Erro ao carregar tarefas: {e}")
+                return []
+        return []
+
+    # Função para salvar tarefas no arquivo
+    def salvar_tarefas():
+        try:
+            with open(ARQUIVO_TAREFAS, "w") as arquivo:
+                json.dump(tarefas, arquivo, indent=4)
+        except Exception as e:
+            print(f"Erro ao salvar tarefas: {e}")
 
     # Função para exibir a lista de tarefas
     def exibir_tarefas():
@@ -25,6 +47,7 @@ def listaDeTarefas():
             tarefa = input("Digite a nova tarefa: ")
             if tarefa:
                 tarefas.append({"nome": tarefa, "concluida": False})
+                salvar_tarefas()  # Salva as mudanças no arquivo
                 print(f"Tarefa '{tarefa}' adicionada com sucesso e marcada como Pendente.")
                 input("\nPressione Enter para continuar...")  # Aguarda o usuário pressionar Enter
                 break
@@ -59,6 +82,7 @@ def listaDeTarefas():
 
         if indice_tarefa is not None:
             tarefa_removida = tarefas.pop(indice_tarefa)
+            salvar_tarefas()  # Salva as mudanças no arquivo
             print(f"Tarefa '{tarefa_removida['nome']}' removida com sucesso!")
         input("\nPressione Enter para continuar...")  # Aguarda o usuário pressionar Enter
 
@@ -93,6 +117,7 @@ def listaDeTarefas():
 
         if indice_tarefa is not None:
             tarefas[indice_tarefa]["concluida"] = True
+            salvar_tarefas()  # Salva as mudanças no arquivo
             print(f"Tarefa '{tarefas[indice_tarefa]['nome']}' marcada como Concluída!")
         input("\nPressione Enter para continuar...")  # Aguarda o usuário pressionar Enter
 
@@ -104,6 +129,7 @@ def listaDeTarefas():
             confirmacao = input("Tem certeza de que deseja limpar todas as tarefas? (s/n): ")
             if confirmacao.lower() == 's':
                 tarefas.clear()
+                salvar_tarefas()  # Salva as mudanças no arquivo
                 print("Todas as tarefas foram removidas com sucesso!")
             else:
                 print("Operação de limpeza cancelada.")
@@ -140,10 +166,12 @@ def listaDeTarefas():
                 print("Saindo do programa...")
                 break
 
+    # Carrega as tarefas salvas no arquivo
+    tarefas.extend(carregar_tarefas())
+
     # Executa o menu da lista de tarefas
     menu()
 
 
 # Executa a lista de tarefas
-
 listaDeTarefas()
